@@ -4,10 +4,7 @@ const { type } = require('os');
 
 const uri = process.env.URI;
 
-mongoose.connect(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(uri)
 .then(() => {
   console.log("Connected to MongoDB via Mongoose!");
 })
