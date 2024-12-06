@@ -3,3 +3,22 @@ GET http://localhost:3000/post
 ###
 
 GET http://localhost:3000/post/felix
+
+###
+
+POST http://localhost:3000/post
+Content-Type: application/json
+
+{
+  "ownerId": "64f6e8a2c48f5b1a88e91234", 
+  "content": "This is a test post for my API.",
+  "comments": [
+    "64f6e8b3c48f5b1a88e91235",
+    "64f6e8c4c48f5b1a88e91236"
+  ],
+  "caption": "Testing my API.",
+  "likedBy": [
+    "64f6e8d5c48f5b1a88e91237",
+    "64f6e8e6c48f5b1a88e91238"
+  ]
+}
