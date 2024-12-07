@@ -13,12 +13,64 @@ Content-Type: application/json
   "ownerId": "64f6e8a2c48f5b1a88e91234", 
   "content": "This is a test post for my API.",
   "comments": [
-    "64f6e8b3c48f5b1a88e91235",
-    "64f6e8c4c48f5b1a88e91236"
+    "64f6e8b3c48f5b1a88e91236",
+    "64f6e8c4c48f5b1a88e91237"
   ],
   "caption": "Testing my API.",
   "likedBy": [
     "64f6e8d5c48f5b1a88e91237",
     "64f6e8e6c48f5b1a88e91238"
   ]
+}
+
+
+###
+
+POST http://localhost:3000/post
+Content-Type: application/json
+
+{
+  "ownerId": "64f6e8a2c48f5b1a88e91234", 
+  "content": "This is a test post for my API.",
+  "comments": [
+    "64f6e8b3c48f5b1a88e91235",
+    "64f6e8c4c48f5b1a88e91us236"
+  ],
+  "caption": "Testing my API.",
+  "likedBy": [
+    "64f6e8d5c48f5b1a88e91237",
+    "64f6e8e6c48f5b1a88e91238"
+  ]
+}
+
+###
+
+GET http://localhost:3000/post/67524074ca29162bad47e08f
+Content-Type: application/json
+
+{
+  "ownerId": "64f6e8a2c48f5b1a88e91234", 
+  "content": "This is a test post for my API.",
+  "comments": [
+    "64f6e8b3c48f5b1a88e91235",
+    "64f6e8c4c48f5b1a88e91us236"
+  ],
+  "caption": "Testing my API.",
+  "likedBy": [
+    "64f6e8d5c48f5b1a88e91237",
+    "64f6e8e6c48f5b1a88e91238"
+  ]
+}
+
+###
+
+DELETE http://localhost:3000/post/6753a52af3ac08ff04d6f0ee
+
+###
+
+PATCH  http://localhost:3000/post/6753a523f3ac08ff04d6f0ec
+Content-Type: application/json
+
+{
+    "caption":"yeah yeah yeah"
 }

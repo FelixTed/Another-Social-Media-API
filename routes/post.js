@@ -12,15 +12,11 @@ router.get('/', async (req,res) => {
     }
 })
 
-// Getting all posts of a single user
-router.get('/:userid', (req,res) => {
-    res.send(req.params.userid);
+// get a single post
+router.get('/:id', getPost, (req,res) => {
+    res.json(res.post);
 })
 
-// Get a single post
-router.get('/id', (req,res) => {
-    
-})
 
 // Creating a post logged in as a user
 router.post('/', async (req,res) => {
@@ -41,14 +37,42 @@ router.post('/', async (req,res) => {
     }
 })
 // Deleting a post in you postHistory
-router.delete('/:id', (req,res) => {
-    
+router.delete('/:id', getPost, async (req,res) => {
+    try{
+        await res.post.deleteOne();
+        res.json({message:"deleted post"})
+    }catch(err){
+        res.status(500).json({message: err.message});
+    }
 })
-// Adding a comment to a post
-router.patch('/', (req,res) => {
-    
+// Modifying caption
+router.patch('/:id',getPost, async (req,res) => {
+    if(req.body.caption != null){
+        res.post.caption = req.body.caption;
+    }
+
+    try{
+        const updatedPost = await res.post.save();
+        res.json(updatedPost);
+    }catch(err){
+        res.status(400).json({message: err.message});
+    }
 })
-// 
+
+async function getPost(req, res, next) {
+    let post;
+    try{
+        post = await Post.findById(req.params.id);
+        if (post == null){
+            return res.status(404).json({ message: 'Cannot find post'});
+        }
+    }catch (err){
+        return res.status(500).json({ message: err.message });
+    }
+
+    res.post = post;
+    next();
+}
 
 module.exports = router;
 
