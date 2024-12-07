@@ -20,6 +20,8 @@ db.once('open', () => console.log('database opened'));
 app.use(express.json())
 
 const postRouter = require('./routes/post');
-app.use('/post',postRouter)
+const userRouter = require('./routes/user');
+app.use('/post',postRouter);
+app.use('/user', userRouter);
 
 app.listen(3000, () => console.log('Server started'));

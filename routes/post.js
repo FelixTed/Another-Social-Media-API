@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Post = require('../models/Post');
 
-// Getting all posts
+// Getting all posts NOTE THIS IS ONLY FOR TESTING PURPOSES, DONT FORGET TO TAKE AWAY IF DEPLOYED
 router.get('/', async (req,res) => {
     try{
         const post = await Post.find();
@@ -18,7 +18,7 @@ router.get('/:id', getPost, (req,res) => {
 })
 
 
-// Creating a post logged in as a user
+// Creating a post
 router.post('/', async (req,res) => {
     const post = new Post({
         ownerId: req.body.ownerId,
@@ -59,6 +59,7 @@ router.patch('/:id',getPost, async (req,res) => {
     }
 })
 
+// Helper to find a single post
 async function getPost(req, res, next) {
     let post;
     try{

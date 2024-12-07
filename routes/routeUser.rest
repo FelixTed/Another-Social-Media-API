@@ -1,0 +1,30 @@
+GET http://localhost:3000/user
+
+###
+GET http://localhost:3000/user/6754cd092c4d508f0fc466c0
+
+###
+POST http://localhost:3000/user
+Content-Type: application/json
+
+{
+    "following": [],
+    "followers": [],
+    "postHistory": [],
+    "name": "testuser2",
+    "profilePic": "https://example.com/profile-pic.jpg",
+    "bio": "This is a test bio.",
+    "stories": [],
+    "chats": [],
+    "password": "securepassword1234"
+}
+
+###
+
+PATCH  http://localhost:3000/user/6754cd092c4d508f0fc466c0
+Content-Type: application/json
+
+{
+    "following":["d18ec8ddabcdfec69dcf8e14"],
+    "bio":"newBIO"
+}
