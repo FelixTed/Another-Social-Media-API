@@ -21,7 +21,9 @@ app.use(express.json())
 
 const postRouter = require('./routes/post');
 const userRouter = require('./routes/user');
+const commentRouter = require('./routes/comment');
 app.use('/post',postRouter);
 app.use('/user', userRouter);
+app.use('/comment', commentRouter);
 
 app.listen(3000, () => console.log('Server started'));
