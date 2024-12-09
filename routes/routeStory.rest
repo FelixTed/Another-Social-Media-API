@@ -1,0 +1,17 @@
+GET http://localhost:3000/story
+
+###
+
+POST http://localhost:3000/story
+Content-Type: application/json
+
+{
+  "ownerId": "64b5f3e8f96e1c4a6b9d1234",
+  "content": "This is a test story content."
+}
+
+###
+
+GET http://localhost:3000/story/67576e5525b3b6c51a3d3462
+###
+DELETE  http://localhost:3000/story/67576e5525b3b6c51a3d3462

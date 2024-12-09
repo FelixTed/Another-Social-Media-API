@@ -36,7 +36,7 @@ router.post('/', async (req,res) => {
         res.status(400).json({message: err.message});
     }
 })
-// Deleting a post in you postHistory
+// Deleting a post
 router.delete('/:id', getPost, async (req,res) => {
     try{
         await res.post.deleteOne();

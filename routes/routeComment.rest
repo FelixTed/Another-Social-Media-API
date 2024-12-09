@@ -10,3 +10,11 @@ Content-Type: application/json
     "postId": "64f3c2c6e4b04a23d8a7b613",
     "content": "This is a test comment for API testing."
 }
+
+###
+
+DELETE http://localhost:3000/comment/67576860a62575f00f9b64d4
+
+###
+
+http://localhost:3000/comment/67576860a62575f00f9b64d4
