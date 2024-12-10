@@ -1,0 +1,21 @@
+GET http://localhost:3000/message
+
+###
+
+POST http://localhost:3000/message
+Content-Type: application/json
+
+{
+    "ownerId": "64a7f9d8e4b0c15f38b12345",
+    "content": "This is a test message.",
+    "attached": "https://example.com/attachment.jpg",
+    "chatId": "64a7fa9de4b0c15f38b54321"
+}
+
+###
+
+GET http://localhost:3000/message/6757a637548b7e4dd3a5f7c4
+
+###
+
+DELETE http://localhost:3000/message/6757a637548b7e4dd3a5f7c4

@@ -24,11 +24,13 @@ const userRouter = require('./routes/user');
 const commentRouter = require('./routes/comment');
 const storyRouter = require('./routes/story');
 const chatRouter = require('./routes/chat');
+const messageRouter = require('./routes/message');
 
 app.use('/post',postRouter);
 app.use('/user', userRouter);
 app.use('/comment', commentRouter);
 app.use('/story', storyRouter);
-app.user('/chat', chatRouter);
+app.use('/chat', chatRouter);
+app.use('/message', messageRouter);
 
 app.listen(3000, () => console.log('Server started'));
