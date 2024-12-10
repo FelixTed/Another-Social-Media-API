@@ -11,7 +11,7 @@ Content-Type: application/json
     "following": [],
     "followers": [],
     "postHistory": [],
-    "name": "testuser2",
+    "name": "testuser",
     "profilePic": "https://example.com/profile-pic.jpg",
     "bio": "This is a test bio.",
     "stories": [],
@@ -21,10 +21,14 @@ Content-Type: application/json
 
 ###
 
-PATCH  http://localhost:3000/user/6754cd092c4d508f0fc466c0
+PATCH  http://localhost:3000/user/6757a881644e1f3c5cfe945c
 Content-Type: application/json
 
 {
-    "following":["d18ec8ddabcdfec69dcf8e14"],
+    "following":"d18ec8ddabcdfec69dcf8e14",
     "bio":"newBIO"
 }
+
+###
+
+DELETE http://localhost:3000/user/6754cd092c4d508f0fc466c0
