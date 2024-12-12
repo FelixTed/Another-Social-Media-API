@@ -1,6 +1,9 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const Post = require('../models/Post');
+const multer = require('multer');
+const Grid = require('gridfs-stream');
 
 // Getting all posts NOTE THIS IS ONLY FOR TESTING PURPOSES, DONT FORGET TO TAKE AWAY IF DEPLOYED
 router.get('/', async (req,res) => {
@@ -12,6 +15,9 @@ router.get('/', async (req,res) => {
     }
 })
 
+const upload = multer({ dest:'uploads/'});
+
+
 // get a single post
 router.get('/:id', getPost, (req,res) => {
     res.json(res.post);
@@ -19,14 +25,18 @@ router.get('/:id', getPost, (req,res) => {
 
 
 // Creating a post
-router.post('/', async (req,res) => {
+router.post('/',upload.single('content'),async (req,res) => {
+
+    const likedBy = JSON.parse(req.body.likedBy);
+    const comments = JSON.parse(req.body.comments); 
+
     const post = new Post({
         ownerId: req.body.ownerId,
-        content: req.body.content,
-        comments: req.body.comments,
+        content: req.file.id,
+        comments: comments.map(id => new mongoose.Types.ObjectId(id)),
         caption: req.body.caption,
         date: req.body.date,
-        likedBy: req.body.likedBy
+        likedBy: likedBy.map(id => new  mongoose.Types.ObjectId(id))
     });
 
     try{
