@@ -33,6 +33,7 @@ app.use('/comment', commentRouter);
 app.use('/story', storyRouter);
 app.use('/chat', chatRouter);
 app.use('/message', messageRouter);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/postUploads', express.static(path.join(__dirname, 'postUploads')));
+app.use('/profilePicUploads', express.static(path.join(__dirname, 'profilePicUploads')));
 
 app.listen(3000, () => console.log('Server started'));

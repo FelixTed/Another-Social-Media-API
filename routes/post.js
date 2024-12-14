@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const router = express.Router();
 const Post = require('../models/Post');
 const multer = require('multer');
-const Grid = require('gridfs-stream');
+const fs = require('fs');
 const path = require('path');
 
 // Getting all posts NOTE THIS IS ONLY FOR TESTING PURPOSES, DONT FORGET TO TAKE AWAY IF DEPLOYED
@@ -11,7 +11,7 @@ router.get('/', async (req,res) => {
     try{
         const posts = await Post.find();
         const updatedPosts = posts.map(post => {
-            const postObject = post.toObject(); // Convert to plain object
+            const postObject = post.toObject();
             if (postObject.content) {
                 postObject.imageUrl = `${req.protocol}://${req.get('host')}/${postObject.content}`;
             }
@@ -24,7 +24,7 @@ router.get('/', async (req,res) => {
 
 })
 
-const upload = multer({ dest:'uploads/'});
+const upload = multer({ dest:'postUploads/'});
 
 
 // Route to get a single post
@@ -63,7 +63,20 @@ router.post('/',upload.single('content'),async (req,res) => {
 // Deleting a post
 router.delete('/:id', getPost, async (req,res) => {
     try{
+
+        const filePath = res.post.content;
+
         await res.post.deleteOne();
+
+        if (filePath) {
+            fs.unlink(path.resolve(filePath), (err) => {
+                if (err) {
+                    console.error("Error deleting the file:", err.message);
+                } else {
+                    console.log("File successfully deleted");
+                }
+            });
+        }
         res.json({message:"deleted post"})
     }catch(err){
         res.status(500).json({message: err.message});

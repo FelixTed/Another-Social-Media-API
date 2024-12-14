@@ -1,26 +1,59 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const User = require('../models/User');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
 // Getting all users
 router.get('/', async (req,res) => {
     try{
-        const user = await User.find();
-        res.json(user)
+        const users = await User.find();
+        const updatedUsers = users.map(user => {
+            const userObject = user.toObject();
+            if (userObject.profilePic){
+                userObject.imageUrl = `${req.protocol}://${req.get('host')}/${userObject.profilePic}`;
+            }
+            return userObject;
+        });
+        res.json(updatedUsers);
     } catch (err) {
         res.status(500).json({message: err.message});
     }
 });
 
+const upload = multer({dest:'profilePicUploads/'});
+
 // Getting an user
 router.get('/:id',getUser,  async (req,res) =>{
+    const user = res.user.toObject();
+
+    if(user.profilePic){
+        user.imageUrl = `${req.protocol}://${req.get('host')}/${user.profilePic}`
+    }
+
     res.json(res.user);
 });
 
 // Deleting an user
 router.delete('/:id', getUser, async (req,res) => {
     try{
+
+        const filePath = res.user.profilePic;
+
         await res.user.deleteOne();
+
+        if(filePath && "profilePicUploads\\basicPic.png" != filePath){
+            fs.unlink(path.resolve(filePath), (err) => {
+                if (err) {
+                    console.error("Error deleting the file:", err.message);
+                } else {
+                    console.log("File successfully deleted");
+                }
+            });
+        }
+
         res.json({message:"deleted user"});
     } catch(err) {
         res.status(500).json({message: err.message});
@@ -28,7 +61,7 @@ router.delete('/:id', getUser, async (req,res) => {
 });
 
 // Updating a user (only allows to update one at a time)
-router.patch('/:id', getUser, async (req,res) => {
+router.patch('/:id',upload.single('profilePic'), getUser, async (req,res) => {
     if (req.body.following != null){
         // Unfollow if already following else follow
         if (res.user.following.includes(req.body.following))
@@ -49,8 +82,18 @@ router.patch('/:id', getUser, async (req,res) => {
             res.user.postHistory.push(req.body.postHistory);
     }else if(req.body.name != null){
         res.user.name = req.body.name;
-    }else if(req.body.profilePic != null){
-        res.user.profilePic = req.body.profilePic;
+    }else if(req.file.path != null){
+        const filePath = res.user.profilePic;
+        if(filePath && "profilePicUploads\\basicPic.png" != filePath){
+            fs.unlink(path.resolve(filePath), (err) => {
+                if (err) {
+                    console.error("Error deleting the file:", err.message);
+                } else {
+                    console.log("File successfully deleted");
+                }
+            });
+        }
+        res.user.profilePic = req.file.path;
     }else if(req.body.bio != null){
         res.user.bio = req.body.bio;
     }else if(req.body.stories != null){
@@ -78,22 +121,40 @@ router.patch('/:id', getUser, async (req,res) => {
 })
 
 // Adding an user
-router.post('/', async (req, res) => {
+router.post('/', upload.single('profilePic'),async (req, res) => {
+
+    const following = JSON.parse(req.body.following);
+    const followers = JSON.parse(req.body.followers);
+    const postHistory = JSON.parse(req.body.postHistory);
+    const stories = JSON.parse(req.body.stories);
+    const chats = JSON.parse(req.body.chats);
+
     const user = new User({
-    following: req.body.following,
-    followers: req.body.followers,
-    postHistory: req.body.postHistory,
+    following: following.map(id => new mongoose.Types.ObjectId(id)),
+    followers: followers.map(id => new mongoose.Types.ObjectId(id)),
+    postHistory: postHistory.map(id => new mongoose.Types.ObjectId(id)),
     name: req.body.name,
-    profilePic: req.body.profilePic,
+    profilePic: req.file.path,
     bio: req.body.bio,
-    stories: req.body.stories,
-    chats: req.body.chats,
+    stories: stories.map(id => new mongoose.Types.ObjectId(id)),
+    chats: chats.map(id => new mongoose.Types.ObjectId(id)),
     password: req.body.password
     });
     try{
         const newUser = await user.save();
         res.status(201).json(newUser);
     }catch (err) {
+        const filePath = user.profilePic;
+
+        if(filePath && "profilePicUploads\\basicPic.png" != filePath){
+            fs.unlink(path.resolve(filePath), (err) => {
+                if (err) {
+                    console.error("Error deleting the file:", err.message);
+                } else {
+                    console.log("File successfully deleted");
+                }
+            });
+        }
         res.status(400).json({message: err.message});
     }
 });
