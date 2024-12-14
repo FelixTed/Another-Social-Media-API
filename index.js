@@ -2,6 +2,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const { type } = require('os');
 const express = require('express');
+const path = require('path');
 const app = express();
 
 const uri = process.env.URI;
@@ -32,5 +33,6 @@ app.use('/comment', commentRouter);
 app.use('/story', storyRouter);
 app.use('/chat', chatRouter);
 app.use('/message', messageRouter);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.listen(3000, () => console.log('Server started'));

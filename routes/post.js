@@ -4,25 +4,39 @@ const router = express.Router();
 const Post = require('../models/Post');
 const multer = require('multer');
 const Grid = require('gridfs-stream');
+const path = require('path');
 
 // Getting all posts NOTE THIS IS ONLY FOR TESTING PURPOSES, DONT FORGET TO TAKE AWAY IF DEPLOYED
 router.get('/', async (req,res) => {
     try{
-        const post = await Post.find();
-        res.json(post)
+        const posts = await Post.find();
+        const updatedPosts = posts.map(post => {
+            const postObject = post.toObject(); // Convert to plain object
+            if (postObject.content) {
+                postObject.imageUrl = `${req.protocol}://${req.get('host')}/${postObject.content}`;
+            }
+            return postObject;
+        });
+        res.json(updatedPosts);
     } catch (err) {
         res.status(500).json({message: err.message});
     }
+
 })
 
 const upload = multer({ dest:'uploads/'});
 
 
-// get a single post
-router.get('/:id', getPost, (req,res) => {
-    res.json(res.post);
-})
+// Route to get a single post
+router.get('/:id', getPost, (req, res) => {
+    const post = res.post.toObject(); 
 
+    if (post.content) {
+        post.imageUrl = `${req.protocol}://${req.get('host')}/${post.content}`; 
+    }
+
+    res.json(post);
+});
 
 // Creating a post
 router.post('/',upload.single('content'),async (req,res) => {
@@ -32,7 +46,7 @@ router.post('/',upload.single('content'),async (req,res) => {
 
     const post = new Post({
         ownerId: req.body.ownerId,
-        content: req.file.id,
+        content: req.file.path,
         comments: comments.map(id => new mongoose.Types.ObjectId(id)),
         caption: req.body.caption,
         date: req.body.date,
