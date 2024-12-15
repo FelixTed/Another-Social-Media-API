@@ -3,9 +3,12 @@ const mongoose = require('mongoose');
 const { type } = require('os');
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 const app = express();
 
 const uri = process.env.URI;
+app.use(express.json());
+app.use(cors());
 
 mongoose.connect(uri)
 .then(() => {
@@ -18,7 +21,6 @@ const db = mongoose.connection;
 db.on('error', (error) => console.error(error));
 db.once('open', () => console.log('database opened'));
 
-app.use(express.json())
 
 // Models
 const postRouter = require('./routes/post');
