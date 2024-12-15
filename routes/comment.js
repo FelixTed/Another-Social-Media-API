@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Comment = require('../models/Comment');
 
+
 // Get all comments. Only for testing purposes
 router.get('/', async (req, res) => {
     try{

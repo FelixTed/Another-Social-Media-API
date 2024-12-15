@@ -6,8 +6,8 @@ POST http://localhost:3000/comment
 Content-Type: application/json
 
 {
-    "ownerId": "64f3c2c6e4b04a23d8a7b612", 
-    "postId": "64f3c2c6e4b04a23d8a7b613",
+    "ownerId": "675f58b1e24ccc529fc2cd31", 
+    "postId": "64f6e8b3c48f5b1a88e91236",
     "content": "This is a test comment for API testing."
 }
 

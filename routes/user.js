@@ -82,7 +82,7 @@ router.patch('/:id',upload.single('profilePic'), getUser, async (req,res) => {
             res.user.postHistory.push(req.body.postHistory);
     }else if(req.body.name != null){
         res.user.name = req.body.name;
-    }else if(req.file.path != null){
+    }else if(req.file && req.file.path){
         const filePath = res.user.profilePic;
         if(filePath && "profilePicUploads\\basicPic.png" != filePath){
             fs.unlink(path.resolve(filePath), (err) => {
@@ -134,13 +134,16 @@ router.post('/', upload.single('profilePic'),async (req, res) => {
     followers: followers.map(id => new mongoose.Types.ObjectId(id)),
     postHistory: postHistory.map(id => new mongoose.Types.ObjectId(id)),
     name: req.body.name,
-    profilePic: req.file.path,
+    profilePic: req.file?.path || null,
     bio: req.body.bio,
     stories: stories.map(id => new mongoose.Types.ObjectId(id)),
     chats: chats.map(id => new mongoose.Types.ObjectId(id)),
     password: req.body.password
     });
     try{
+        if (user.profilePic === null){
+            user.profilePic = "profilePicUploads\\basicPic.png";
+        }
         const newUser = await user.save();
         res.status(201).json(newUser);
     }catch (err) {
