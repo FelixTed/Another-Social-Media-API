@@ -13,7 +13,7 @@ router.get('/', async (req,res) => {
         const updatedUsers = users.map(user => {
             const userObject = user.toObject();
             if (userObject.profilePic){
-                userObject.imageUrl = `${req.protocol}://${req.get('host')}/${userObject.profilePic}`;
+                userObject.imageUrl = `http://localhost:3000/${userObject.profilePic}`;
             }
             return userObject;
         });
@@ -30,10 +30,10 @@ router.get('/:id',getUser,  async (req,res) =>{
     const user = res.user.toObject();
 
     if(user.profilePic){
-        user.imageUrl = `${req.protocol}://${req.get('host')}/${user.profilePic}`
+        user.imageUrl = `http://localhost:3000/${user.profilePic}`
     }
 
-    res.json(res.user);
+    res.json(user);
 });
 
 // Deleting an user
