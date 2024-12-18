@@ -92,6 +92,12 @@ router.patch('/:id',getPost, async (req,res) => {
             res.post.likedBy.pull(req.body.likedBy);
         else
             res.post.likedBy.push(req.body.likedBy);
+    }else if(req.body.comments != null){
+        // pull story if already in stories else add
+        if (res.post.comments.includes(req.body.comments))
+            res.post.comments.pull(req.body.comments);
+        else
+            res.post.comments.push(req.body.comments);
     }
 
     try{
