@@ -86,6 +86,12 @@ router.delete('/:id', getPost, async (req,res) => {
 router.patch('/:id',getPost, async (req,res) => {
     if(req.body.caption != null){
         res.post.caption = req.body.caption;
+    }else if(req.body.likedBy != null){
+        // pull story if already in stories else add
+        if (res.post.likedBy.includes(req.body.likedBy))
+            res.post.likedBy.pull(req.body.likedBy);
+        else
+            res.post.likedBy.push(req.body.likedBy);
     }
 
     try{
