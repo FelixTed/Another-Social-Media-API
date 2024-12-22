@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
@@ -5,6 +6,10 @@ const User = require('../models/User');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Getting all users
 router.get('/', async (req,res) => {
@@ -162,6 +167,40 @@ router.post('/', upload.single('profilePic'),async (req, res) => {
     }
 });
 
+router.post('/login', async (req, res) => {
+    const { name, password } = req.body;
+
+    try {
+        const user = await User.findOne({ name });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        console.log(user.password);
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect)
+            return res.status(400).json({ message: 'Invalid credentials' });
+
+        const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
+
+        res.status(200).json({ message: 'Login successful', token });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+});
+
+
+const authenticate = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'No token provided' });
+
+    try {
+        const decoded = jwt.verify(token, 'your_secret_key');
+        req.user = decoded;
+        next();
+    } catch (error) {
+        res.status(403).json({ message: 'Invalid token' });
+    }
+};
+
+
 // Helper to find a single user
 async function getUser(req, res, next) {
     let user;
@@ -177,5 +216,7 @@ async function getUser(req, res, next) {
     res.user = user;
     next();
 }
+
+
 
 module.exports = router;
