@@ -145,12 +145,14 @@ router.post('/', upload.single('profilePic'),async (req, res) => {
     chats: chats.map(id => new mongoose.Types.ObjectId(id)),
     password: req.body.password
     });
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
+
     try{
         if (user.profilePic === null){
             user.profilePic = "profilePicUploads\\basicPic.png";
         }
         const newUser = await user.save();
-        res.status(201).json(newUser);
+        res.status(201).json({'user':newUser, 'token':token});
     }catch (err) {
         const filePath = user.profilePic;
 
