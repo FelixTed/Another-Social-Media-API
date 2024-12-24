@@ -127,45 +127,50 @@ router.patch('/:id',upload.single('profilePic'), getUser, async (req,res) => {
 
 // Adding an user
 router.post('/', upload.single('profilePic'),async (req, res) => {
-
-    const following = JSON.parse(req.body.following);
-    const followers = JSON.parse(req.body.followers);
-    const postHistory = JSON.parse(req.body.postHistory);
-    const stories = JSON.parse(req.body.stories);
-    const chats = JSON.parse(req.body.chats);
-
-    const user = new User({
-    following: following.map(id => new mongoose.Types.ObjectId(id)),
-    followers: followers.map(id => new mongoose.Types.ObjectId(id)),
-    postHistory: postHistory.map(id => new mongoose.Types.ObjectId(id)),
-    name: req.body.name,
-    profilePic: req.file?.path || null,
-    bio: req.body.bio,
-    stories: stories.map(id => new mongoose.Types.ObjectId(id)),
-    chats: chats.map(id => new mongoose.Types.ObjectId(id)),
-    password: req.body.password
-    });
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
-
     try{
+        const following = JSON.parse(req.body.following);
+        const followers = JSON.parse(req.body.followers);
+        const postHistory = JSON.parse(req.body.postHistory);
+        const stories = JSON.parse(req.body.stories);
+        const chats = JSON.parse(req.body.chats);
+
+        const user = new User({
+        following: following.map(id => new mongoose.Types.ObjectId(id)),
+        followers: followers.map(id => new mongoose.Types.ObjectId(id)),
+        postHistory: postHistory.map(id => new mongoose.Types.ObjectId(id)),
+        name: req.body.name,
+        profilePic: req.file?.path || null,
+        bio: req.body.bio,
+        stories: stories.map(id => new mongoose.Types.ObjectId(id)),
+        chats: chats.map(id => new mongoose.Types.ObjectId(id)),
+        password: req.body.password
+        });
+        const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
+
         if (user.profilePic === null){
             user.profilePic = "profilePicUploads\\basicPic.png";
         }
         const newUser = await user.save();
         res.status(201).json({'user':newUser, 'token':token});
     }catch (err) {
-        const filePath = user.profilePic;
+        if(typeof user !== 'undefined'){
+            const filePath = user.profilePic;
 
-        if(filePath && "profilePicUploads\\basicPic.png" != filePath){
-            fs.unlink(path.resolve(filePath), (err) => {
-                if (err) {
-                    console.error("Error deleting the file:", err.message);
-                } else {
-                    console.log("File successfully deleted");
-                }
-            });
+            if(filePath && "profilePicUploads\\basicPic.png" != filePath){
+                fs.unlink(path.resolve(filePath), (err) => {
+                    if (err) {
+                        console.error("Error deleting the file:", err.message);
+                    } else {
+                        console.log("File successfully deleted");
+                    }
+                    });
+            }
         }
-        res.status(400).json({message: err.message});
+        if(err.code === 11000){
+            return res.status(400).json({message:'Name already in use. Please choose another.'});
+        }
+
+        res.status(500).json({message: err.message});
     }
 });
 
