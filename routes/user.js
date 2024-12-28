@@ -28,6 +28,26 @@ router.get('/', async (req,res) => {
     }
 });
 
+// Searching for a user
+router.get('/search/:searchTerm', async (req,res) => {
+    try{
+        searchTerm = req.params.searchTerm || '';
+        const users = await User.find({
+            name: {$regex: searchTerm, $options: 'i'}
+        }).lean();
+        
+        users.forEach(user => {
+            if(user.profilePic){
+                user.imageUrl = `http://localhost:3000/${user.profilePic}`;
+            }
+        });
+        
+        res.status(200).json(users);
+    } catch(error){
+        res.status(500).json({'error': error.message}); 
+    }
+});
+
 const upload = multer({dest:'profilePicUploads/'});
 
 // Getting an user
