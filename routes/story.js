@@ -4,7 +4,19 @@ const Story = require('../models/Story');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const cloudinary = require('cloudinary');
 
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET_KEY,
+  secure: true,
+});
 // Getting all the stories only for testing purpose
 router.get('/', async (req,res) => {
     try{
@@ -22,7 +34,7 @@ router.get('/', async (req,res) => {
     }
 });
 
-const upload = multer({ dest:'storyUploads/'});
+// const upload = multer({ dest:'storyUploads/'});
 
 // get a single story
 router.get('/:id', getStory, async (req, res) =>{
@@ -39,9 +51,22 @@ router.get('/:id', getStory, async (req, res) =>{
 router.post('/', upload.single('content'), async (req,res) => {
     const date = new Date();
 
+    // Upload image to Cloudinary directly from memory
+        const uploadResult = await new Promise((resolve, reject) => {
+            const stream = cloudinary.v2.uploader.upload_stream(
+            { folder: 'stories' }, 
+            (error, result) => {
+                if (error) return reject(error);
+                resolve(result);
+            }
+            );
+            stream.end(req.file.buffer);
+        });
+
+
     const story = new Story({
         ownerId: req.body.ownerId,
-        content: req.file.path,
+        content: uploadResult,
         date: date.toString()
     })
 
@@ -61,14 +86,17 @@ router.delete('/:id', getStory, async (req,res) => {
 
         await res.story.deleteOne();
 
-        if (filePath) {
-            fs.unlink(path.resolve(filePath),(err) => {
-                if (err) {
-                    console.error("Error deleting the file:", err.message);
-                } else {
-                    console.log("File successfully deleted");
-                }
-            });
+         if(filePath){
+                                
+            const cloudinaryUrl = filePath;
+            const publicId = cloudinaryUrl
+            .split('/')
+            .slice(-2) 
+            .join('/')
+            .replace(/\.[^/.]+$/, '');
+
+            // Delete the image from Cloudinary
+            await cloudinary.v2.uploader.destroy(publicId);
         }
         res.json({message: 'Deleted Story'});
     }catch(err){

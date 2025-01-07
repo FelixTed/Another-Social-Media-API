@@ -6,6 +6,7 @@ const path = require('path');
 const cors = require('cors');
 const app = express();
 
+
 const uri = process.env.URI;
 app.use(express.json());
 app.use(cors());
@@ -20,6 +21,8 @@ mongoose.connect(uri)
 const db = mongoose.connection;
 db.on('error', (error) => console.error(error));
 db.once('open', () => console.log('database opened'));
+
+
 
 
 // Models

@@ -8,6 +8,22 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const cloudinary = require('cloudinary');
+
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET_KEY,
+  secure: true,
+});
+
+
+
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -17,9 +33,9 @@ router.get('/', async (req,res) => {
         const users = await User.find();
         const updatedUsers = users.map(user => {
             const userObject = user.toObject();
-            if (userObject.profilePic){
-                userObject.imageUrl = `http://localhost:3000/${userObject.profilePic}`;
-            }
+            // if (userObject.profilePic){
+            //     userObject.imageUrl = `${req.protocol}://${req.get('host')}/${userObject.profilePic}`;
+            // }
             return userObject;
         });
         res.json(updatedUsers);
@@ -36,11 +52,11 @@ router.get('/search/:searchTerm', async (req,res) => {
             name: {$regex: searchTerm, $options: 'i'}
         }).lean();
         
-        users.forEach(user => {
-            if(user.profilePic){
-                user.imageUrl = `http://localhost:3000/${user.profilePic}`;
-            }
-        });
+        // users.forEach(user => {
+        //     if(user.profilePic){
+        //         user.imageUrl = `${req.protocol}://${req.get('host')}/${user.profilePic}`;
+        //     }
+        // });
         
         res.status(200).json(users);
     } catch(error){
@@ -48,15 +64,15 @@ router.get('/search/:searchTerm', async (req,res) => {
     }
 });
 
-const upload = multer({dest:'profilePicUploads/'});
+// const upload = multer({dest:'profilePicUploads/'});
 
 // Getting an user
 router.get('/:id',getUser,  async (req,res) =>{
     const user = res.user.toObject();
 
-    if(user.profilePic){
-        user.imageUrl = `http://localhost:3000/${user.profilePic}`
-    }
+    // if(user.profilePic){
+    //     user.imageUrl = `${req.protocol}://${req.get('host')}/${user.profilePic}`
+    // }
 
     res.json(user);
 });
@@ -69,14 +85,17 @@ router.delete('/:id', getUser, async (req,res) => {
 
         await res.user.deleteOne();
 
-        if(filePath && "profilePicUploads\\basicPic.png" != filePath){
-            fs.unlink(path.resolve(filePath), (err) => {
-                if (err) {
-                    console.error("Error deleting the file:", err.message);
-                } else {
-                    console.log("File successfully deleted");
-                }
-            });
+        if(filePath && "https://res.cloudinary.com/ddkzxhjsz/image/upload/f_auto,q_auto/v1/users/zypbbiqkitsjvk9j2msl" != filePath){
+                
+            const cloudinaryUrl = filePath;
+            const publicId = cloudinaryUrl
+            .split('/')
+            .slice(-2) 
+            .join('/')
+            .replace(/\.[^/.]+$/, '');
+
+            // Delete the image from Cloudinary
+            await cloudinary.v2.uploader.destroy(publicId);
         }
 
         res.json({message:"deleted user"});
@@ -107,17 +126,31 @@ router.patch('/:id',upload.single('profilePic'), getUser, async (req,res) => {
             res.user.postHistory.push(req.body.postHistory);
     }else if(req.body.name != null){
         res.user.name = req.body.name;
-    }else if(req.file && req.file.path){
+    }else if(req.file && req.file.buffer){
         const filePath = res.user.profilePic;
-        if(filePath && "profilePicUploads\\basicPic.png" != filePath){
-            fs.unlink(path.resolve(filePath), (err) => {
-                if (err) {
-                    console.error("Error deleting the file:", err.message);
-                } else {
-                    console.log("File successfully deleted");
-                }
-            });
+        if(filePath && "https://res.cloudinary.com/ddkzxhjsz/image/upload/f_auto,q_auto/v1/users/zypbbiqkitsjvk9j2msl" != filePath){
+                
+            const cloudinaryUrl = filePath;
+            const publicId = cloudinaryUrl
+            .split('/')
+            .slice(-2) 
+            .join('/')
+            .replace(/\.[^/.]+$/, '');
+
+            // Delete the image from Cloudinary
+            await cloudinary.v2.uploader.destroy(publicId);
         }
+         // Upload image to Cloudinary directly from memory
+         const uploadResult = await new Promise((resolve, reject) => {
+            const stream = cloudinary.v2.uploader.upload_stream(
+                { folder: 'users' }, 
+                (error, result) => {
+                if (error) return reject(error);
+                resolve(result);
+                }
+            );
+            stream.end(req.file.buffer);
+            });
         res.user.profilePic = req.file.path;
     }else if(req.body.bio != null){
         res.user.bio = req.body.bio;
@@ -154,12 +187,24 @@ router.post('/', upload.single('profilePic'),async (req, res) => {
         const stories = JSON.parse(req.body.stories);
         const chats = JSON.parse(req.body.chats);
 
+        // Upload image to Cloudinary directly from memory
+        const uploadResult = await new Promise((resolve, reject) => {
+            const stream = cloudinary.v2.uploader.upload_stream(
+                { folder: 'users' }, 
+                (error, result) => {
+                if (error) return reject(error);
+                resolve(result);
+                }
+            );
+            stream.end(req.file.buffer);
+            });
+
         const user = new User({
         following: following.map(id => new mongoose.Types.ObjectId(id)),
         followers: followers.map(id => new mongoose.Types.ObjectId(id)),
         postHistory: postHistory.map(id => new mongoose.Types.ObjectId(id)),
         name: req.body.name,
-        profilePic: req.file?.path || null,
+        profilePic: uploadResult?.secure_url || null,
         bio: req.body.bio,
         stories: stories.map(id => new mongoose.Types.ObjectId(id)),
         chats: chats.map(id => new mongoose.Types.ObjectId(id)),
@@ -168,22 +213,26 @@ router.post('/', upload.single('profilePic'),async (req, res) => {
         const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
 
         if (user.profilePic === null){
-            user.profilePic = "profilePicUploads\\basicPic.png";
+            user.profilePic = "https://res.cloudinary.com/ddkzxhjsz/image/upload/f_auto,q_auto/v1/users/zypbbiqkitsjvk9j2msl";
         }
         const newUser = await user.save();
         res.status(201).json({'user':newUser, 'token':token});
     }catch (err) {
         if(typeof user !== 'undefined'){
             const filePath = user.profilePic;
+            
 
-            if(filePath && "profilePicUploads\\basicPic.png" != filePath){
-                fs.unlink(path.resolve(filePath), (err) => {
-                    if (err) {
-                        console.error("Error deleting the file:", err.message);
-                    } else {
-                        console.log("File successfully deleted");
-                    }
-                    });
+            if(filePath && "https://res.cloudinary.com/ddkzxhjsz/image/upload/f_auto,q_auto/v1/users/zypbbiqkitsjvk9j2msl" != filePath){
+                
+                const cloudinaryUrl = filePath;
+                const publicId = cloudinaryUrl
+                .split('/')
+                .slice(-2) 
+                .join('/')
+                .replace(/\.[^/.]+$/, '');
+
+                // Delete the image from Cloudinary
+                await cloudinary.v2.uploader.destroy(publicId);
             }
         }
         if(err.code === 11000){
