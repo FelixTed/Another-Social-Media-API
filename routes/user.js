@@ -180,6 +180,7 @@ router.patch('/:id',upload.single('profilePic'), getUser, async (req,res) => {
 
 // Adding an user
 router.post('/', upload.single('profilePic'),async (req, res) => {
+    let uploadResult = null;
     try{
         const following = JSON.parse(req.body.following);
         const followers = JSON.parse(req.body.followers);
@@ -188,16 +189,19 @@ router.post('/', upload.single('profilePic'),async (req, res) => {
         const chats = JSON.parse(req.body.chats);
 
         // Upload image to Cloudinary directly from memory
-        const uploadResult = await new Promise((resolve, reject) => {
-            const stream = cloudinary.v2.uploader.upload_stream(
-                { folder: 'users' }, 
-                (error, result) => {
-                if (error) return reject(error);
-                resolve(result);
-                }
-            );
-            stream.end(req.file.buffer);
-            });
+        if (req.body.profilePic){
+            uploadResult = await new Promise((resolve, reject) => {
+                const stream = cloudinary.v2.uploader.upload_stream(
+                    { folder: 'users' }, 
+                    (error, result) => {
+                    if (error) return reject(error);
+                    resolve(result);
+                    }
+                );
+                stream.end(req.file.buffer);
+                });
+        }
+
 
         const user = new User({
         following: following.map(id => new mongoose.Types.ObjectId(id)),
