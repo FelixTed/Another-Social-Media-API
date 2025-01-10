@@ -151,7 +151,7 @@ router.patch('/:id',upload.single('profilePic'), getUser, async (req,res) => {
             );
             stream.end(req.file.buffer);
             });
-        res.user.profilePic = req.file.path;
+        res.user.profilePic = uploadResult.secure_url;
     }else if(req.body.bio != null){
         res.user.bio = req.body.bio;
     }else if(req.body.stories != null){

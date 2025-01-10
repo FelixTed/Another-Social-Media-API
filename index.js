@@ -41,9 +41,5 @@ app.use('/story', storyRouter);
 app.use('/chat', chatRouter);
 app.use('/message', messageRouter);
 
-// Files
-app.use('/postUploads', express.static(path.join(__dirname, 'postUploads')));
-app.use('/profilePicUploads', express.static(path.join(__dirname, 'profilePicUploads')));
-app.use('/storyUploads', express.static(path.join(__dirname, 'storyUploads')));
-
-app.listen(3000, () => console.log('Server started'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
