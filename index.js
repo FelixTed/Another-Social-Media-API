@@ -16,6 +16,7 @@ const uri = process.env.URI;
 
 // app.use(cors(corsOptions));
 // app.options('*', cors(corsOptions));
+app.use(cors());
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', 'https://another-social-media-app.onrender.com'); // Allow your frontend origin
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS'); // Allow the required methods
