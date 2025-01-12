@@ -8,20 +8,20 @@ const app = express();
 
 
 const uri = process.env.URI;
-// const corsOptions = {
-//   origin: 'https://another-social-media-app.onrender.com',
-//   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-//   credentials: true,
-// };
+const corsOptions = {
+  origin: 'https://another-social-media-app.onrender.com',
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
 
-// app.use(cors(corsOptions));
-// app.options('*', cors(corsOptions));
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://another-social-media-app.onrender.com');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+// app.use((req, res, next) => {
+//   res.setHeader('Access-Control-Allow-Origin', 'https://another-social-media-app.onrender.com');
+//   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
+//   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+//   next();
+// });
 
 mongoose.connect(uri)
 .then(() => {
