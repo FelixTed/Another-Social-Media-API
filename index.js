@@ -7,21 +7,26 @@ const cors = require('cors');
 const app = express();
 
 
-const uri = process.env.URI;
-const corsOptions = {
-  origin: 'https://another-social-media-app.onrender.com',
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-};
+// const uri = process.env.URI;
+// const corsOptions = {
+//   origin: 'https://another-social-media-app.onrender.com',
+//   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// };
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
-// app.use((req, res, next) => {
-//   res.setHeader('Access-Control-Allow-Origin', 'https://another-social-media-app.onrender.com');
-//   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
-//   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-//   next();
-// });
+// app.use(cors(corsOptions));
+// app.options('*', cors(corsOptions));
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://another-social-media-app.onrender.com'); // Allow your frontend origin
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS'); // Allow the required methods
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allow necessary headers
+
+  if (req.method === 'OPTIONS') {
+      return res.status(204).end(); // Respond OK for preflight
+  }
+
+  next();
+});
 
 mongoose.connect(uri)
 .then(() => {
