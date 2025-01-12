@@ -7,7 +7,7 @@ const cors = require('cors');
 const app = express();
 
 
-// const uri = process.env.URI;
+const uri = process.env.URI;
 // const corsOptions = {
 //   origin: 'https://another-social-media-app.onrender.com',
 //   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
