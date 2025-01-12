@@ -9,8 +9,9 @@ const app = express();
 
 const uri = process.env.URI;
 const corsOptions = {
-  origin: ['https://another-social-media-app.onrender.com'],
+  origin: 'https://another-social-media-app.onrender.com',
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
