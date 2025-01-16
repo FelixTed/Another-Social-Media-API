@@ -8,8 +8,27 @@ const app = express();
 
 
 const uri = process.env.URI;
+// const corsOptions = {
+//   origin: 'https://another-social-media-app.onrender.com',
+//   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// };
+
+// app.use(cors(corsOptions));
+// app.options('*', cors(corsOptions));
+const corsOptions = {
+  origin: 'https://another-social-media-app.onrender.com',
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Content-Type-Options', 'Accept', 'X-Requested-With', 'Origin'],
+  credentials: true,
+  maxAge: 7200
+};
+
+app.use(cors(corsOptions));
+
+
 app.use(express.json());
-app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect(uri)
 .then(() => {
@@ -41,9 +60,5 @@ app.use('/story', storyRouter);
 app.use('/chat', chatRouter);
 app.use('/message', messageRouter);
 
-// Files
-app.use('/postUploads', express.static(path.join(__dirname, 'postUploads')));
-app.use('/profilePicUploads', express.static(path.join(__dirname, 'profilePicUploads')));
-app.use('/storyUploads', express.static(path.join(__dirname, 'storyUploads')));
-
-app.listen(3000, () => console.log('Server started'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
