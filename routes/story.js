@@ -5,7 +5,7 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const cloudinary = require('cloudinary');
-
+const cron = require('node-cron');
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -103,6 +103,18 @@ router.delete('/:id', getStory, async (req,res) => {
         res.status(500).json({message:err.message});
     }
 })
+
+// 7 days
+const timeLimitInMs = 24 * 60 * 60 * 1000 * 7; 
+// Run every sunday at midnight
+cron.schedule('0 0 * * 0', async () => {
+    const now = new Date();
+    const result = await db.collection('stories').deleteMany({
+        date: { $lt: new Date(now - timeLimitInMs) }
+    });
+
+    console.log(`Deleted ${result.deletedCount} expired stories.`);
+});
 
 
 // Helper function to get a story
