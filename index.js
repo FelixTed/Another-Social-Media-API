@@ -17,7 +17,7 @@ const uri = process.env.URI;
 // app.use(cors(corsOptions));
 // app.options('*', cors(corsOptions));
 const corsOptions = {
-  origin: 'https://another-social-media-app.onrender.com',
+  origin: ['https://another-social-media-app.onrender.com',"http://127.0.0.1:59014"],
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Content-Type-Options', 'Accept', 'X-Requested-With', 'Origin'],
   credentials: true,
