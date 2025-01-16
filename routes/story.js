@@ -66,7 +66,7 @@ router.post('/', upload.single('content'), async (req,res) => {
 
     const story = new Story({
         ownerId: req.body.ownerId,
-        content: uploadResult,
+        content: uploadResult.secure_url,
         date: date.toString()
     })
 
